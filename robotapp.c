@@ -9,8 +9,7 @@ void RobotApp(int argc, char *argv[])
     printf ("Initialisation complete\n");
 
     int result;
-    char* Data;
-
+    char Data[64];
 
     result = QRCodeDecode(Data,64);
 

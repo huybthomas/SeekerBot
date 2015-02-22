@@ -5,55 +5,80 @@ typedef enum
     false, true
 } bool;
 
+FILE* camStat;
+FILE* zbarStat;
+
 int QRCodeDecode(char *Data,int MaxDataLen)
 {
-    system ("espeak -ven+f2 -k5 -a50 -s150 \"Say cheese.\" --stdout | aplay");
-    //Take image with front camera and save it to file /mnt/QRSnaps/QRSnap.jpg
-    if(!system("raspistill -w 640 -h 480 -q 80 -rot 180 -o /mnt/QRSnaps/QRSnap.jpg"))
+    printf("Start QR code scan...\n");
+    system("espeak -ven+f2 -k5 -a50 -s150 \"Scannig package.\" --stdout | aplay");
+
+    //Take image with front camera, save it to file /mnt/QRSnaps/QRSnap.jpg and print output+error stream to file
+    system("raspistill -w 640 -h 480 -q 80 -rot 180 -o /mnt/QRSnaps/QRSnap.jpg 2>&1>/mnt/QRSnaps/camStat");
+
+    //Read Raspicam logs
+    camStat = fopen("/mnt/QRSnaps/camStat", "r");
+
+    if(camStat == NULL)
     {
-        system ("espeak -ven+f2 -k5 -a50 -s150 \"Click click.\" --stdout | aplay");
+        printf("Error while reading camera logs!\n");
+        return 3;   //Other error
+    }
+
+    //LOGIC TO INTERPRET CAMERALOG
+
+    if(1)
+    {
+        printf("Scan complete.\nAnalysing...\n");
+        system("espeak -ven+f2 -k5 -a50 -s150 \"Scan complete. Analysing.\" --stdout | aplay");
     }
     else
     {
-        system ("espeak -ven+f2 -k5 -a50 -s150 \"Error, no smile detected.\" --stdout | aplay");
+        printf("Error while taking picture!\n");
+        system("espeak -ven+f2 -k5 -a50 -s150 \"Error.\" --stdout | aplay");
+        return 1;   //Camera error
     }
 
-    FILE* pipe = popen("zbarimg /mnt/QRSnaps/QRSnap.jpg", "r");
-    if(!pipe)
+    fclose(camStat);
+
+    //Analysing taken picture for QRcode and print result to file
+    system("zbarimg /mnt/QRSnaps/QRSnap.jpg 2>&1>/mnt/QRSnaps/zbarStat");
+
+    //Read zbar logs
+    zbarStat = fopen("/mnt/QRSnaps/zbarStat", "r");
+
+    if(zbarStat == NULL)
     {
-        return 3;
+        printf("Error while reading zbar logs!\n");
+        return 3;   //Other error
     }
+
     char buffer[128];
-    char readData[MaxDataLen];
-    bool ready = false;
+    bool found = false;
 
-    while(!feof(pipe) || !ready)
+    while(fgets(buffer, 128, zbarStat) != NULL && !found)
     {
-        if(fgets(buffer, 128, pipe) != NULL)
+        if(buffer[0] == 'Q')
         {
-            if(buffer[0] == 'Q')
+            int i = 0;
+            while(buffer[8 + i] != '\n' && i < MaxDataLen - 1)
             {
-                int i = 0;
-                while(buffer[8 + i] != '\n' && i < MaxDataLen - 1)
-                {
-                    readData[i] = buffer[8 + i];
-                    ++i;
-                }
-                readData[i + 1] = '\0';
-                ready = true;
+                Data[i] = buffer[8 + i];
+                i++;
             }
+            Data[i + 1] = '\0';
+            found = true;
         }
     }
 
-    pclose(pipe);
+    fclose(zbarStat);
 
-    if(ready)
+    if(found)
     {
-        Data = readData;
-        return 0;
+        return 0;   //QRcode OK
     }
     else
     {
-        return 2;
+        return 2;   //No QRcode detected
     }
 }
