@@ -122,6 +122,7 @@ int main(int argc, char *argv[])
 
     //Unmount ramdisk
     system("sudo umount /mnt/QRSnaps");
+    system("sudo rmdir /mnt/QRSnaps");
 
     //Terminate RS485Client
     res=RS485ClientDeinit(&RS485Client);
