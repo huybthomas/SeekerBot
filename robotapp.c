@@ -9,18 +9,18 @@ void RobotApp(int argc, char *argv[])
     printf ("Initialisation complete\n");
 
     int result;
-    char Data[64];
+    char Data[24];
 
-    result = QRCodeDecode(Data,64);
+    result = TagReaderGetUID(Data);
 
-    if(result == 0)
+    if(result==0)
     {
-        printf("QR-code:\n");
+        printf("Tag UID:\n");
         printf("%s\n", Data);
     }
     else
     {
-        printf("No QR-code detected! Error code: %d\n", result);
+        printf("No RF-tag detected! Error code: %d\n", result);
     }
 
     printf ("Ready.\n");
