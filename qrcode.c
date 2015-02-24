@@ -20,7 +20,7 @@ int QRCodeDecode(char *Data,int MaxDataLen)
     }
 
     printf("Start QR code scan...\n");
-    system("espeak -ven+f2 -k5 -a50 -s150 \"Scannig package.\" --stdout | aplay");
+    system("espeak -ven+f2 -k5 -a50 -s150 \"Scanning package.\" --stdout | aplay");
 
     //Take image with front camera, save it to file /mnt/QRSnaps/QRSnap.jpg and print output+error stream to file
     system("sudo raspistill -w 640 -h 480 -q 80 -rot 180 -o /mnt/QRSnaps/QRSnap.jpg > /mnt/QRSnaps/camStat 2>&1");

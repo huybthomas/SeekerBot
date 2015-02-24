@@ -19,7 +19,7 @@ int TagReaderGetUID(char *Data)
     }
 
     printf("Start RF-tag scan...\n");
-    system("espeak -ven+f2 -k5 -a50 -s150 \"Scannig tag.\" --stdout | aplay");
+    system("espeak -ven+f2 -k5 -a50 -s150 \"Scanning tag.\" --stdout | aplay");
 
     //Pipe the read tag info command to scriptor, drop the error stream to null device
     scriptor = popen("echo \"FF CA 00 00 00\" | scriptor 2>&1", "r");
