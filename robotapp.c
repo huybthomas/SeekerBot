@@ -15,8 +15,12 @@ void RobotApp(int argc, char *argv[])
 
     if(result == 0)
     {
-        printf("QR-code: \n");
-        printf(Data);
+        printf("QR-code:\n");
+        printf("%s\n", Data);
+    }
+    else
+    {
+        printf("No QR-code detected! Error code: %d\n", result);
     }
 
     printf ("Ready.\n");

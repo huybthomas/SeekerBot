@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 typedef enum
 {
@@ -10,11 +11,19 @@ FILE* zbarStat;
 
 int QRCodeDecode(char *Data,int MaxDataLen)
 {
+    char buffer[128];
+
+    if(Data == NULL)
+    {
+        printf("Error, Data is NULL.\n");
+        return 3;   //Other error
+    }
+
     printf("Start QR code scan...\n");
     system("espeak -ven+f2 -k5 -a50 -s150 \"Scannig package.\" --stdout | aplay");
 
     //Take image with front camera, save it to file /mnt/QRSnaps/QRSnap.jpg and print output+error stream to file
-    system("raspistill -w 640 -h 480 -q 80 -rot 180 -o /mnt/QRSnaps/QRSnap.jpg 2>&1>/mnt/QRSnaps/camStat");
+    system("sudo raspistill -w 640 -h 480 -q 80 -rot 180 -o /mnt/QRSnaps/QRSnap.jpg > /mnt/QRSnaps/camStat 2>&1");
 
     //Read Raspicam logs
     camStat = fopen("/mnt/QRSnaps/camStat", "r");
@@ -25,9 +34,7 @@ int QRCodeDecode(char *Data,int MaxDataLen)
         return 3;   //Other error
     }
 
-    //LOGIC TO INTERPRET CAMERALOG
-
-    if(1)
+    if(fgets(buffer, 128, camStat) == NULL)
     {
         printf("Scan complete.\nAnalysing...\n");
         system("espeak -ven+f2 -k5 -a50 -s150 \"Scan complete. Analysing.\" --stdout | aplay");
@@ -42,7 +49,7 @@ int QRCodeDecode(char *Data,int MaxDataLen)
     fclose(camStat);
 
     //Analysing taken picture for QRcode and print result to file
-    system("zbarimg /mnt/QRSnaps/QRSnap.jpg 2>&1>/mnt/QRSnaps/zbarStat");
+    system("zbarimg /mnt/QRSnaps/QRSnap.jpg > /mnt/QRSnaps/zbarStat 2>&1");
 
     //Read zbar logs
     zbarStat = fopen("/mnt/QRSnaps/zbarStat", "r");
@@ -53,21 +60,32 @@ int QRCodeDecode(char *Data,int MaxDataLen)
         return 3;   //Other error
     }
 
-    char buffer[128];
+    char* token;
+    int QRSize = 0;
     bool found = false;
 
     while(fgets(buffer, 128, zbarStat) != NULL && !found)
     {
-        if(buffer[0] == 'Q')
+        //Check logs for "QR-Code:"
+        if(strstr(buffer, "QR-Code:") != NULL)
         {
-            int i = 0;
-            while(buffer[8 + i] != '\n' && i < MaxDataLen - 1)
+            //Get the QR-code
+            token = strrchr(buffer, ':');
+
+            if(token != NULL)
             {
-                Data[i] = buffer[8 + i];
-                i++;
+                QRSize = strlen(token + 1);     //Get string length without '\0'
+                if(QRSize + 1 < MaxDataLen)
+                {
+                    strcpy(Data, token + 1);
+                }
+                else
+                {
+                    strncpy(Data, token + 1, MaxDataLen - 1);
+                    Data[MaxDataLen - 1] = '\0';	//String terminator
+                }
+                found = true;
             }
-            Data[i + 1] = '\0';
-            found = true;
         }
     }
 
@@ -82,3 +100,6 @@ int QRCodeDecode(char *Data,int MaxDataLen)
         return 2;   //No QRcode detected
     }
 }
+
+//Uitbreiding 1: De QR-code met '*' heeft een ingebouwde error correction: Reed-Solomon. Hiermee kan de QR-code scanner de QR-code interpreteren indien
+//er een deel van de code is bedekt. De QR-code zonder '*' moet volledig zichtbaar zijn om deze correct te kunnen interpreteren.
