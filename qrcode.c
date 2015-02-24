@@ -20,7 +20,7 @@ int QRCodeDecode(char *Data,int MaxDataLen)
     }
 
     printf("Start QR code scan...\n");
-    system("espeak -ven+f2 -k5 -a50 -s150 \"Scanning package.\" --stdout | aplay");
+    system("espeak -ven+f2 -k5 -a50 -s150 \"Scanning package.\" --stdout | aplay 2>/dev/null");
 
     //Take image with front camera, save it to file /mnt/QRSnaps/QRSnap.jpg and print output+error stream to file
     system("sudo raspistill -w 640 -h 480 -q 80 -rot 180 -o /mnt/QRSnaps/QRSnap.jpg > /mnt/QRSnaps/camStat 2>&1");
@@ -37,12 +37,12 @@ int QRCodeDecode(char *Data,int MaxDataLen)
     if(fgets(buffer, 128, camStat) == NULL)
     {
         printf("Scan complete.\nAnalysing...\n");
-        system("espeak -ven+f2 -k5 -a50 -s150 \"Scan complete. Analysing.\" --stdout | aplay");
+        system("espeak -ven+f2 -k5 -a50 -s150 \"Scan complete. Analysing.\" --stdout | aplay 2>/dev/null");
     }
     else
     {
         printf("Error while taking picture!\n");
-        system("espeak -ven+f2 -k5 -a50 -s150 \"Error.\" --stdout | aplay");
+        system("espeak -ven+f2 -k5 -a50 -s150 \"Error.\" --stdout | aplay 2>/dev/null");
         return 1;   //Camera error
     }
 
