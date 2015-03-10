@@ -78,6 +78,7 @@ int QRCodeDecode(char *Data,int MaxDataLen)
                 if(QRSize + 1 < MaxDataLen)
                 {
                     strcpy(Data, token + 1);
+                    Data[QRSize - 1] = '\0';    //String terminator
                 }
                 else
                 {
