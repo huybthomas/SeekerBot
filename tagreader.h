@@ -14,5 +14,29 @@
 */
 int TagReaderGetUID(char *Data);
 
+/**
+ * \brief Write byte data to a passive tag in range
+ * \param BlockNumber :The starting block to be updated
+ * \param DataLength :The number of bytes to be updated
+ * \param Data :New data to store on the tag.
+ * \return
+ * 0:OK \n
+ * 1:Tag reader error \n
+ * 2:No tag detected \n
+ * 3:Other error \n
+*/
+int TagReaderWriteData(int BlockNumber, int DataLength, char* Data);
+
+/**
+ * \brief Read byte data from a passive tag in range
+ * \param BlockNumber :The starting block to be readed from
+ * \param Data :Location to store the data
+ * \param DataLength :The number of bytes to read
+ * 0:OK \n
+ * 1:Tag reader error \n
+ * 2:No tag detected \n
+ * 3:Other error \n
+*/
+int TagReaderReadData(int BlockNumber, int DataLength, char* Data);
 
 #endif
