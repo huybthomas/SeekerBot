@@ -1,6 +1,6 @@
 #include "dijkstra.h"
 
-//init
+//init map structure
 private NodeStruct map[12];
 initMap(0, -1, 4, -1, -1, -1, 8, -1, -1);
 initMap(1, -1, -1, -1, -1, -1, -1, -1, -1);
