@@ -16,7 +16,6 @@ void VisitNode(NodeStruct *Map, int MapSize, int Start, int Finish)
     int currentPosition = Start;
     int currentNeighbour = 0;
     int i;
-    int shortestDistance = 0;
     Node* nodeList;
     Node* nodePointer;
     Node* currentNode;
@@ -296,6 +295,9 @@ int GetRelDirection(int PrevAbsDir, int NextAbsDir)
             }
             break;
     }
+
+    //Invalid direction
+    return -1;
 }
 
 void InitMap(NodeStruct* Map, int map, int n,  int o, int z, int w, int nn, int oo, int zz, int ww)
