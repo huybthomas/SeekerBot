@@ -27,6 +27,7 @@ void VisitNode(NodeStruct *Map, int MapSize, int Start, int Finish)
     nodeList = (Node*) malloc (sizeof(Node));
     nodeList->Node = &Map[Start];
     nodeList->ID = Start;
+    nodeList->Next = NULL;
 
     while(currentPosition != Finish && nodeList != NULL)
     {
