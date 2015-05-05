@@ -25,11 +25,12 @@ typedef struct
 
 /**
  * \brief Initialize RF communications system
+ * \param Channel :RF channel to listen from
  * \return
  * 0:OK \n
  * 1:Error \n
 */
-int RfCommsInit(void);
+int RfCommsInit(int Channel);
 
 /**
  * \brief Send data packet in RfCommsPacket struct form

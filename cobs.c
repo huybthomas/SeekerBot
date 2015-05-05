@@ -160,7 +160,7 @@ int decodeCOBSZPE(unsigned char* inBuffer, int length, unsigned char* outBuffer)
     unsigned char zeroPosition;
     const unsigned char zeroPairByte = 0XE0;
 
-    if(length > 255)
+    if(length > 224)
     {
         //Message is to long to decode with COBS
         return -1;

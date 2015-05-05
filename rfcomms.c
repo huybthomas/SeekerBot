@@ -2,15 +2,17 @@
 
 int initialized = 0;
 
-int RfCommsInit(void)
+int RfCommsInit(int Channel)
 {
     int res;
 
     //Initialize RF-CC1101 module
-    RfCC1101.RS485Client=&RS485Client;
+    RfCC1101.RS485Client = &RS485Client;
     RfCC1101.Frequency = 433920000;
     RfCC1101.ModType = CC1101_MOD_FSK;
     RfCC1101.Rate = CC1101_RATE_1200;
+    RfCC1101.RFAddr = Channel;
+
     res = RfCC1101Init(&RfCC1101);
     if(res != 0)
     {
@@ -59,7 +61,7 @@ int RfCommsReceivePacket(RfCommsPacket *Packet)
         return 1;
     }
 
-    res = RfCC1101FIFOReceiveData(&RfCC1101, Packet->Data, Packet->Rssi, Packet->Lqi);
+    res = RfCC1101FIFOReceiveData(&RfCC1101, Packet->Data, &Packet->Rssi, &Packet->Lqi);
 
     if(res != 0)
     {
