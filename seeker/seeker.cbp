@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="seeker" />
+		<Option makefile_is_custom="1" />
+		<Option pch_mode="2" />
+		<Option compiler="armbcm2708hardfplinuxgnueabi" />
+		<Build>
+			<Target title="Debug">
+				<Option output="seeker" prefix_auto="1" extension_auto="1" />
+				<Option object_output="/home/eric/ProgrammingExamples/Examples/rs485/.objs" />
+				<Option type="1" />
+				<Option compiler="armbcm2708hardfplinuxgnueabi" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="../../minimod/Libs/datatypes.h" />
+		<Unit filename="../../minimod/Libs/lego-motor.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../minimod/Libs/lego-motor.h" />
+		<Unit filename="../../minimod/Libs/lego-motorRegs.h" />
+		<Unit filename="../../minimod/Libs/lego-sensor.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../minimod/Libs/lego-sensor.h" />
+		<Unit filename="../../minimod/Libs/lego-sensorRegs.h" />
+		<Unit filename="../../minimod/Libs/lin-delay.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../minimod/Libs/lin-delay.h" />
+		<Unit filename="../../minimod/Libs/lin-gpio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../minimod/Libs/lin-gpio.h" />
+		<Unit filename="../../minimod/Libs/lin-lego-motor-log.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../minimod/Libs/lin-lego-motor-log.h" />
+		<Unit filename="../../minimod/Libs/lin-rpi-gpio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../minimod/Libs/lin-rpi-gpio.h" />
+		<Unit filename="../../minimod/Libs/lin-rpi-serlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../minimod/Libs/rf-cc1101.h" />
+		<Unit filename="../lib/TimeSupport.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../lib/TimeSupport.h" />
+		<Unit filename="../lib/timestep.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../lib/timestep.h" />
+		<Unit filename="Makefile" />
+		<Unit filename="cobs.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cobs.h" />
+		<Unit filename="dijkstra.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="dijkstra.h" />
+		<Unit filename="drive.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="drive.h" />
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="map.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="map.h" />
+		<Unit filename="project.h" />
+		<Unit filename="qrcode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="qrcode.h" />
+		<Unit filename="rfcomms.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rfcomms.h" />
+		<Unit filename="robotapp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="robotapp.h" />
+		<Unit filename="speaker.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="speaker.h" />
+		<Unit filename="tagreader.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="tagreader.h" />
+		<Unit filename="travel.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="travel.h" />
+		<Extensions>
+			<code_completion>
+				<search_path add="/home/lubuntu/minimod/Libs" />
+				<search_path add="/home/lubuntu/rpi/tools/arm-bcm2708/arm-bcm2708hardfp-linux-gnueabi/arm-bcm2708hardfp-linux-gnueabi/sysroot/usr/include" />
+			</code_completion>
+			<debugger>
+				<search_path add="/home/lubuntu/robotica/seeker/" />
+				<remote_debugging>
+					<options conn_type="0" serial_baud="115200" ip_address="robot1" ip_port="5000" />
+				</remote_debugging>
+				<remote_debugging target="Debug">
+					<options conn_type="0" serial_baud="115200" ip_address="robot1" ip_port="5000" />
+				</remote_debugging>
+			</debugger>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
