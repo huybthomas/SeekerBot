@@ -5,7 +5,7 @@ void RobotApp(int argc, char *argv[])
     NodeStruct mapLabo[MAPSIZE];
     uint8 startPosition, startSearchPosition, currentPosition, searchPosition, goalPosition;
     uint8 pickerRFChannel;
-    uint8 attempts, respons, receiveState;
+    uint8 attempts, respons;
     float driveSpeed = 80;
     char* packetQRCode;
     unsigned char messageSendBuffer[223];
@@ -38,6 +38,7 @@ void RobotApp(int argc, char *argv[])
     if(RfCommsInit(SEEKER_RFCHANNEL) != 0)
     {
         printf("Error while initialising RF-module\n");
+        espeak("RF sender error!");
 
         return;
     }
@@ -54,21 +55,20 @@ void RobotApp(int argc, char *argv[])
 
         (Section needs to be implemented on the pickerbot)
     **/
-/*
+
     //Check if pickerbot is available
     respons = 0;
     attempts = 0;
-    receiveState = 0;
 
     char pingMessage[] = "SEEKER PING";
-    sprintf((char*)messageSendBuffer, pingMessage);
 
     //Try three times before time-out
     while(respons == 0 && attempts < 3)
     {
-        if(sendMessage(messageSendBuffer, pickerRFChannel) != 0)
+        if(sendMessage((unsigned char*)pingMessage, pickerRFChannel) != 0)
         {
             printf("Error, could not send message to pickerbot: %d!\nProgram will terminate now.\n", pickerRFChannel);
+            espeak("RF sender error!");
 
             return;
         }
@@ -106,10 +106,15 @@ void RobotApp(int argc, char *argv[])
     if(attempts >= 3)
     {
         printf("Pickerbot: %d is not available or is not responding!\nProgram will terminate now.\n", pickerRFChannel);
+        espeak("Pickerbot is not available!");
 
         return;
     }
-*/
+
+    /**
+        End of section
+    **/
+
     //Seeck for first RF-tag to locate start location
     DriveLineFollow(driveSpeed);
 
@@ -122,6 +127,7 @@ void RobotApp(int argc, char *argv[])
     if(result != 0)
     {
         printf("No RF-tag detected! Error code: %d\nProgram will terminalte now.\n", result);
+        espeak("RF-tag not found!");
 
         return;
     }
@@ -132,6 +138,7 @@ void RobotApp(int argc, char *argv[])
     if(currentPosition == -1)
     {
         printf("Current position is unknown!\nProgram will terminate now.\n");
+        espeak("Current position not found!");
 
         return;
     }
@@ -144,6 +151,7 @@ void RobotApp(int argc, char *argv[])
     if(startPosition == -1)
     {
         printf("Could not determin start position!\nProgram will terminate now.\n");
+        espeak("Start position not found!");
 
         return;
     }
@@ -194,11 +202,12 @@ void RobotApp(int argc, char *argv[])
             }
             else if(result == 2)
             {
-                printf("No QR-code detected!\n", result);
+                printf("No QR-code detected!\n");
             }
             else
             {
                 printf("Error using camera! Error code: %d\nProgram will terminate now.\n", result);
+                espeak("Camera is malfunctioning!");
 
                 return;
             }
@@ -225,6 +234,7 @@ void RobotApp(int argc, char *argv[])
     if(!found)
     {
         printf("Packet not found on the endpoints!\nProgram will terminate now.\n");
+        espeak("Packet not found!");
 
         return;
     }
@@ -258,16 +268,15 @@ void RobotApp(int argc, char *argv[])
     //Send the pick up job to the pickerbot
     respons = 0;
     attempts = 0;
-    receiveState = 0;
 
-    char jobMessage[12];      //Format: JOB:[START],[FINISH]
+    //Command job Format: JOB:[START],[FINISH]
     sprintf((char*)messageSendBuffer, "JOB:%d,%d", startPosition, goalPosition);
 
     /**
         Check if the given pickerbot has received the pickup job and retry three
         times before time-out when no acknowledgment is received from pickerbot.
 
-        (Section needs to be implemented on the pickerbot)
+        (Section needs to be implemented on the pickerbot for successful termination)
     **/
 
     //Send three attempts with package location before time-out
@@ -276,6 +285,7 @@ void RobotApp(int argc, char *argv[])
         if(sendMessage(messageSendBuffer, pickerRFChannel) != 0)
         {
             printf("Error, could not send message to pickerbot: %d!\nProgram will terminate now.\n", pickerRFChannel);
+            espeak("RF sender error!");
 
             return;
         }
@@ -313,29 +323,31 @@ void RobotApp(int argc, char *argv[])
     if(attempts >= 3)
     {
         printf("Pickerbot: %d is not available or is not responding!\nProgram will terminate now.\n", pickerRFChannel);
+        espeak("Pickerbot is not responding!");
 
         return;
     }
 
+    /**
+        End of section
+    **/
+
     printf("Program successfull ended.\n");
+    espeak("Program complete. Ready.");
 }
 
 int sendMessage(unsigned char* message, int destRFAddress)
 {
-    unsigned char encodeBuffer[224];
-    int encodeLength;
     RfCommsPacket rfPacket;
 
-    //Encode message with COBS/ZPE
-    encodeLength = encodeCOBSZPE(message, strlen((const char*)message), encodeBuffer);
-
-    rfPacket.DataLen = encodeLength;
+    rfPacket.DataLen = strlen((const char*)message);
     rfPacket.DstRfAddr = destRFAddress;
     rfPacket.SrcRfAddr = SEEKER_RFCHANNEL;
+    rfPacket.Cmd = 0;
     rfPacket.Lqi = 0;
     rfPacket.Rssi = 0;
 
-    strncpy((char*)rfPacket.Data, (const char*)encodeBuffer, encodeLength);
+    strcpy((char*)rfPacket.Data, (const char*)message);
 
     if(RfCommsSendPacket(&rfPacket) != 0)
     {
@@ -349,14 +361,11 @@ int sendMessage(unsigned char* message, int destRFAddress)
 
 int receiveMessage(unsigned char* message)
 {
-    int length;
     RfCommsPacket rfPacket;
 
     if(RfCommsReceivePacket(&rfPacket) == 0)
     {
-        //Decode received message
-        length = decodeCOBSZPE(rfPacket.Data, rfPacket.DataLen, message);
-        message[length] = '\0';
+        strcpy((char*)message, (const char*)rfPacket.Data);
     }
     else
     {

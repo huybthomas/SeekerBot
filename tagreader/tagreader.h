@@ -1,5 +1,5 @@
-#ifndef QRCODE_H
-#define QRCODE_H
+#ifndef TAGREADER_H
+#define TAGREADER_H
 
 #include <stdio.h>
 #include <string.h>

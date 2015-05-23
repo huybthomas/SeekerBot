@@ -16,5 +16,5 @@ main.o: main.c project.h /home/lubuntu/minimod/Libs/rs485client.h \
  /home/lubuntu/minimod/Libs/lego-motor.h \
  /home/lubuntu/robotica/lib/TimeSupport.h \
  /home/lubuntu/minimod/Libs/datatypes.h qrcode.h tagreader.h dijkstra.h \
- cobs.h map.h drive.h /home/lubuntu/robotica/lib/timestep.h robotapp.h \
- speaker.h rfcomms.h travel.h
+ map.h drive.h /home/lubuntu/robotica/lib/timestep.h robotapp.h speaker.h \
+ rfcomms.h cobs.h travel.h

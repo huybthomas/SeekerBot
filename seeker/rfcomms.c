@@ -29,7 +29,10 @@ int RfCommsInit(int Channel)
 
 int RfCommsSendPacket(RfCommsPacket *Packet)
 {
-    int res;
+    int res = 0;
+    unsigned char encodeMessageBuffer[64];
+    unsigned char encodeBuffer[64];
+    uint8 dataLength;
 
     if(!initialized)
     {
@@ -41,7 +44,23 @@ int RfCommsSendPacket(RfCommsPacket *Packet)
         return 1;
     }
 
-    res = RfCC1101FIFOSendData(&RfCC1101, Packet->Data, Packet->DstRfAddr);
+    //Encode Data
+    dataLength = encodeCOBSZPE(Packet->Data, Packet->DataLen, encodeMessageBuffer);
+
+    //Encode and send Data length
+    encodeCOBSZPE(&dataLength, 1, encodeBuffer);
+    res += RfCC1101FIFOSendData(&RfCC1101, encodeBuffer, Packet->DstRfAddr);
+
+    //Encode and send Source RF address
+    encodeCOBSZPE(&Packet->SrcRfAddr, 1, encodeBuffer);
+    res += RfCC1101FIFOSendData(&RfCC1101, encodeBuffer, Packet->DstRfAddr);
+
+    //Encode and send Cmd
+    encodeCOBSZPE(&Packet->Cmd, 1, encodeBuffer);
+    res += RfCC1101FIFOSendData(&RfCC1101, encodeBuffer, Packet->DstRfAddr);
+
+    //Send Data
+    res += RfCC1101FIFOSendData(&RfCC1101, encodeMessageBuffer, Packet->DstRfAddr);
 
     if(res != 0)
     {
@@ -54,14 +73,44 @@ int RfCommsSendPacket(RfCommsPacket *Packet)
 
 int RfCommsReceivePacket(RfCommsPacket *Packet)
 {
-    int res;
+    int res = 0;
+    uint8 decodeBuffer[64];
+    uint8 receivedData[64];
+    int decodeLength;
 
     if(!initialized)
     {
         return 1;
     }
 
-    res = RfCC1101FIFOReceiveData(&RfCC1101, Packet->Data, &Packet->Rssi, &Packet->Lqi);
+    //Receive and decode Data length
+    res += RfCC1101FIFOReceiveData(&RfCC1101, decodeBuffer, &Packet->Rssi, &Packet->Lqi);
+    if(res == 0)
+    {
+        decodeCOBSZPE(decodeBuffer, 2, &Packet->DataLen);
+    }
+
+    //Receive and decode Source RF address
+    res += RfCC1101FIFOReceiveData(&RfCC1101, decodeBuffer, &Packet->Rssi, &Packet->Lqi);
+    if(res == 0)
+    {
+        decodeCOBSZPE(decodeBuffer, 2, &Packet->SrcRfAddr);
+    }
+
+    //Receive and decode Cmd
+    res += RfCC1101FIFOReceiveData(&RfCC1101, decodeBuffer, &Packet->Rssi, &Packet->Lqi);
+    if(res == 0)
+    {
+        decodeCOBSZPE(decodeBuffer, 2, &Packet->Cmd);
+    }
+
+    //Receive and decode data
+    res += RfCC1101FIFOReceiveData(&RfCC1101, receivedData, &Packet->Rssi, &Packet->Lqi);
+    if(res == 0)
+    {
+        decodeLength = decodeCOBSZPE(receivedData, Packet->DataLen, Packet->Data);
+        Packet->Data[decodeLength] = '\0';
+    }
 
     if(res != 0)
     {

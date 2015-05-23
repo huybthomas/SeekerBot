@@ -3,8 +3,8 @@
 int main(void)
 {
 	NodeStruct mapLabo[12];
-	int Start = 10;
-	int Finish = 4;
+	int Start = 8;
+	int Finish = 10;
 
     //Initialise map
 	initializeMap(mapLabo);

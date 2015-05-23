@@ -54,4 +54,10 @@ void DriveLineFollowDistance(int Distance, float Speed);
 */
 void DriveLineFollow(float Speed);
 
+/**
+ * \brief Calibrate sensors for following a line.
+ * \return The correction factor to take into account.
+*/
+int calibrate(void);
+
 #endif

@@ -250,7 +250,7 @@ int GetRelDirection(int PrevAbsDir, int NextAbsDir)
             {
                 //Go NORTH
                 case 0:
-                    return 0;   //Go STRAIGHT
+                    return 2;   //Go STRAIGHT
                     break;
                 //Go EAST
                 case 1:

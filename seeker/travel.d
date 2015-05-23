@@ -17,5 +17,5 @@ travel.o: travel.c travel.h robotapp.h project.h \
  /home/lubuntu/minimod/Libs/lin-delay.h \
  /home/lubuntu/robotica/lib/TimeSupport.h \
  /home/lubuntu/minimod/Libs/datatypes.h qrcode.h tagreader.h dijkstra.h \
- cobs.h map.h drive.h /home/lubuntu/robotica/lib/timestep.h robotapp.h \
- speaker.h rfcomms.h
+ map.h drive.h /home/lubuntu/robotica/lib/timestep.h robotapp.h speaker.h \
+ rfcomms.h cobs.h

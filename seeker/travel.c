@@ -7,19 +7,22 @@ int Travel(NodeStruct* Map, int MapSize, int Start, int Finish, float Speed)
 
     do
     {
+printf("POSITION: %d\n", previousPoint);
+printf("NEXT: %d\n", Map[previousPoint].Next);
+printf("DIRECTION: %d\n", Map[previousPoint].NextRelDir);
         switch(Map[previousPoint].NextRelDir)
         {
             case 1:
-                DriveRotateRWheel(90.0, Speed);         //Turn left
                 printf("Turn left\n");
+                DriveRotateRWheel(90.0, Speed);         //Turn left
                 break;
             case 2:
-                DriveStraightDistance(120.0, Speed);    //Straight forward
                 printf("Going straight\n");
+                DriveStraightDistance(120.0, Speed);    //Straight forward
                 break;
             case 3:
-                DriveRotateLWheel(90.0, Speed);         //Turn right
                 printf("Turn right\n");
+                DriveRotateLWheel(90.0, Speed);         //Turn right
                 break;
         }
 
@@ -27,10 +30,11 @@ int Travel(NodeStruct* Map, int MapSize, int Start, int Finish, float Speed)
 
         previousPoint = Map[previousPoint].Next;        //Get next node
 
-        if(previousPoint == -1)
+        if(Map[previousPoint].Next == -1)
         {
             hasNext = false;                            //End of route
         }
+
     } while(hasNext);
 
     return 0;

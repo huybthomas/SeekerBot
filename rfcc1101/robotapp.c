@@ -6,14 +6,10 @@ void RobotApp(int argc, char *argv[])
     LegoMotorSetup(&LegoMotor,2,0,0);
 
     int srcRFAddress = 6;
-    int destRFAddress = 7;
+    int destRFAddress = 2;
     uint8 receiveStatus = 0;
     uint8 receivePollFailed = 0;
     unsigned char message[60] = "Hello from robot6!";
-    unsigned char encodeBuffer[255];
-    unsigned char decodeBuffer[255];
-    int encodeLength;
-    int decodedLength;
     RfCommsPacket rfPacket;
 
     printf("Initialisation complete\n");
@@ -48,16 +44,15 @@ void RobotApp(int argc, char *argv[])
     printf("Sending message '%s' to address: %d\n", message, destRFAddress);
     system("espeak -ven+f2 -k5 -a50 -s150 \"Sending message.\" --stdout | aplay 2>/dev/null");
 
-    //Encode message with COBS
-    encodeLength = encodeCOBSZPE(message, strlen((const char*)message), encodeBuffer);
-
-    rfPacket.DataLen = encodeLength;
+    //rfPacket.DataLen = encodeLength;
+    rfPacket.DataLen = strlen((const char*)message);
     rfPacket.DstRfAddr = destRFAddress;
     rfPacket.SrcRfAddr = srcRFAddress;
+    rfPacket.Cmd = 0;
     rfPacket.Lqi = 0;
     rfPacket.Rssi = 0;
 
-    strncpy((char*)rfPacket.Data, (const char*)encodeBuffer, encodeLength);
+    strncpy((char*)rfPacket.Data, (const char*)message, strlen((const char*)message));
 
     //Send message to destination
     if(RfCommsSendPacket(&rfPacket) != 0)
@@ -84,10 +79,7 @@ void RobotApp(int argc, char *argv[])
     {
         if(RfCommsReceivePacket(&rfPacket) == 0)
         {
-            //Decode received message
-            decodedLength = decodeCOBSZPE(rfPacket.Data, rfPacket.DataLen, decodeBuffer);
-            decodeBuffer[decodedLength] = '\0';
-            printf("Message: %s\n", decodeBuffer);
+            printf("Message: %s\n", rfPacket.Data);
         }
         else
         {

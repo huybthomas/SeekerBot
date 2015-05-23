@@ -2,6 +2,7 @@
 #define RFCOMMS_H
 
 #include "robotapp.h"
+#include "cobs.h"
 
 #define RFCOMMS_MAX_DATA_LEN 32
 

@@ -14,7 +14,6 @@
 #include "qrcode.h"
 #include "tagreader.h"
 #include "dijkstra.h"
-#include "cobs.h"
 #include "map.h"
 #include "drive.h"
 #include "speaker.h"

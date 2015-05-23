@@ -10,7 +10,6 @@
 #include "lin-delay.h"
 #include "TimeSupport.h"
 #include "rfcomms.h"
-#include "cobs.h"
 #include <stdlib.h>
 
 extern RS485ClientStruct RS485Client;

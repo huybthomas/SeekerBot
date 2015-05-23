@@ -34,7 +34,7 @@ install:
 rundebug:
 	sshpass -p $(REMOTE_PASS) ssh -t $(REMOTE_SERVER)  "sudo gdbserver localhost:5000 $(REMOTE_PATH)/$(APP_BINARY)"
 runnodebug:
-	sshpass -p $(REMOTE_PASS) ssh -t $(REMOTE_SERVER) sudo "$(REMOTE_PATH)/$(APP_BINARY) 3 lading2"
+	sshpass -p $(REMOTE_PASS) ssh -t $(REMOTE_SERVER) sudo "$(REMOTE_PATH)/$(APP_BINARY) 2 lading2"
 plotlog:
 	rm -f $(LOGFILE)
 	sshpass -p $(REMOTE_PASS) scp -o StrictHostKeyChecking=no  $(REMOTE_SERVER):$(REMOTE_PATH)/$(LOGFILE) .

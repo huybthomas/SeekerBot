@@ -2,6 +2,7 @@
 #define RFCOMMS_H
 
 #include "robotapp.h"
+#include "cobs.h"
 
 #define RFCOMMS_MAX_DATA_LEN 32
 
@@ -49,7 +50,6 @@ int RfCommsSendPacket(RfCommsPacket *Packet);
  * 1:Error \n
 */
 int RfCommsReceivePacket(RfCommsPacket *Packet);
-
 
 /**
  * \brief Polls whether packet is ready in receive buffer

@@ -16,6 +16,6 @@ qrcode.o: qrcode.c qrcode.h robotapp.h project.h \
  /home/lubuntu/minimod/Libs/lego-sensorRegs.h \
  /home/lubuntu/minimod/Libs/lin-delay.h \
  /home/lubuntu/robotica/lib/TimeSupport.h \
- /home/lubuntu/minimod/Libs/datatypes.h tagreader.h dijkstra.h cobs.h \
- map.h drive.h /home/lubuntu/robotica/lib/timestep.h robotapp.h speaker.h \
- rfcomms.h travel.h
+ /home/lubuntu/minimod/Libs/datatypes.h tagreader.h dijkstra.h map.h \
+ drive.h /home/lubuntu/robotica/lib/timestep.h robotapp.h speaker.h \
+ rfcomms.h cobs.h travel.h
