@@ -1,20 +1,24 @@
+/**
+    Code developed by Quinten Van Hasselt & Timothy Verstraete
+**/
+
 #include "drive.h"
 #include "math.h"
 #include "timestep.h"
 
-static float const MMPD = 0.46; // mm per degree
-static float const MMRD = 2;  // mm per degree to rotate
-static uint16 const KP = 1800; //2100 jan is 2400
-static uint16 const KD = 4200; // 5000       3800
+static float const MMPD = 0.46;     // mm per degree
+static float const MMRD = 2;        // mm per degree to rotate
+static uint16 const KP = 1800;      // first value was 2100, this one seems more stable
+static uint16 const KD = 4200;      // first value was 5000, this one seems more stable
 static uint16 const KI = 0;
 static uint16 const IMAX = 0;
-static int const MOTOR_R = 1;
-static int const MOTOR_L = 2;
-static int const SENSOR_R = 1;
-static int const SENSOR_L = 2;
-int cal;
-uint16 iLcal;
-uint16 iRcal;
+static int const MOTOR_R = 1;       // motor right
+static int const MOTOR_L = 2;       // motor left
+static int const SENSOR_R = 1;      // sensor right
+static int const SENSOR_L = 2;      // sensor left
+int cal;                            // calibration difference value
+uint16 iLcal;                       // left sensor calibrated value on drive stroke
+uint16 iRcal;                       // right sensor calibrated value on drive stroke
 
 
 /**
@@ -43,8 +47,6 @@ int DriveInit(void)
     error += LegoSensorSetupLSensor(&LegoSensor, SENSOR_R, 1);
     error += LegoSensorSetupLSensor(&LegoSensor, SENSOR_L, 1);
 
-    TimeStepInit(10000);
-
     // calibrate
     cal = calibrate();
     if(error == 0)
@@ -65,24 +67,35 @@ int DriveInit(void)
 */
 
 // eventuele verbetering : wachten op elkaar met verhogen van setpoint zodat de wielen meer gelijktijdig rijden
-// eventuele verbetering : max speed
 void DriveStraightDistance(float Distance,float Speed)
 {
+    // Delay of 50ms to stabilize sensors and motors
+    _delay_ms(50);
+
+    // Safety mechanism: speed limited to maximum 100 mm/s.
+    if(Speed > 100)
+    {
+        Speed = 100;
+    }
+
     float totalangle = Distance/MMPD;               // total turning angle for the wheels
     float rotspeed = (fabs(Speed)/100)/MMPD;        // Speed /s --> /10ms is dividing by 100  == [degrees / 10 ms]
     float curangle = 0;
 
     // put in PID mode
-    LegoMotorSetup(&LegoMotor,MOTOR_R,1,1);
-    LegoMotorSetup(&LegoMotor,MOTOR_L,1,1);
+    LegoMotorSetup(&LegoMotor, MOTOR_R, 1, 1);
+    LegoMotorSetup(&LegoMotor, MOTOR_L, 1, 1);
 
-    // reset pos
+    // reset angular motor position
     LegoMotorSetPos(&LegoMotor, MOTOR_R, 0);
     LegoMotorSetPos(&LegoMotor, MOTOR_L, 0);
 
+    // Setup timestep module with time step of 10ms
+    TimeStepInit(10000);
+
     if(totalangle > 0)
     {
-        // vooruit
+        // forward
         while(curangle < totalangle)
         {
             curangle += rotspeed;
@@ -93,7 +106,7 @@ void DriveStraightDistance(float Distance,float Speed)
     }
     else if(totalangle < 0)
     {
-        // achteruit
+        // backward
         while(curangle > totalangle)
         {
             curangle -= rotspeed;
@@ -111,79 +124,107 @@ void DriveStraightDistance(float Distance,float Speed)
  * \param Speed :Speed in mm/s
 */
 
-// uitbreiding : meer dan 360 graden?
 void DriveRotateRWheel(float Angle,float Speed)
 {
+    // Delay of 50ms to stabilize sensors and motors
+    _delay_ms(50);
+
+    // Safety mechanism: speed limited to maximum 100 mm/s.
+    if(Speed > 100)
+    {
+        Speed = 100;
+    }
+
     float rotspeed = (fabs(Speed)/100)/MMPD;    // Speed /s --> /10ms is dividing by 100  == [degrees / 10 ms]
     float totalangle = Angle*MMRD/MMPD;         // total turning distance for wheel
     float curangle = 0;
-    TimeStepInit(10000);
 
     // enable R/disable L
     LegoMotorSetup(&LegoMotor,MOTOR_R,1,1);
     LegoMotorSetup(&LegoMotor,MOTOR_L,0,0);
 
-    // reset pos R wheel
+    // reset angular motor position right wheel
     LegoMotorSetPos(&LegoMotor, MOTOR_R, 0);
+
+    // Setup timestep module with time step of 10ms
+    TimeStepInit(10000);
 
     if(totalangle > 0)
     {
+        // forward
         while(curangle < totalangle)
         {
             curangle += rotspeed;
-            LegoMotorPIDControl(&LegoMotor,MOTOR_R, curangle*2, KP, KD, KI, IMAX);
+            LegoMotorPIDControl(&LegoMotor,MOTOR_R, curangle*2, KP, KD, KI, IMAX);  // *2 because PID controller works with half degrees
             TimeStep(0);
         }
     }
     else if(totalangle < 0)
     {
+        // backward
         while(curangle > totalangle)
         {
             curangle -= rotspeed;
-            LegoMotorPIDControl(&LegoMotor,MOTOR_R, curangle*2, KP, KD, KI, IMAX);
+            LegoMotorPIDControl(&LegoMotor,MOTOR_R, curangle*2, KP, KD, KI, IMAX);  // *2 because PID controller works with half degrees
             TimeStep(0);
         }
     }
 }
+
 
 /**
  * \brief Rotate robot around left wheel over specified angle, at specified speed. Returns after drive is complete.
  * \param Angle :Angle to rotate in deg
  * \param Speed :Speed in mm/s
 */
+
 void DriveRotateLWheel(float Angle,float Speed)
 {
+    // Delay of 50ms to stabilize sensors and motors
+    _delay_ms(50);
+
+    // Safety mechanism: speed limited to maximum 100 mm/s.
+    if(Speed > 100)
+    {
+        Speed = 100;
+    }
+
     float rotspeed = (fabs(Speed)/100)/MMPD;    // Speed /s --> /10ms is dividing by 100  == [degrees / 10 ms]
     float totalangle = Angle*MMRD/MMPD;         // total turning distance for wheel
     float curangle = 0;
-    TimeStepInit(10000);
 
     // enable L/disable R
     LegoMotorSetup(&LegoMotor,MOTOR_L,1,1);
     LegoMotorSetup(&LegoMotor,MOTOR_R,0,0);
 
-    // reset pos L wheel
+    // reset motor angular pos L wheel
     LegoMotorSetPos(&LegoMotor, MOTOR_L, 0);
+
+    // Setup timestep module with time step of 10ms
+    TimeStepInit(10000);
 
     if(totalangle > 0)
     {
+        // forward
         while(curangle < totalangle)
         {
             curangle += rotspeed;
-            LegoMotorPIDControl(&LegoMotor,MOTOR_L, curangle*2, KP, KD, KI, IMAX);
+            LegoMotorPIDControl(&LegoMotor,MOTOR_L, curangle*2, KP, KD, KI, IMAX);  // *2 because PID controller works with half degrees
             TimeStep(0);
         }
     }
     else if(totalangle < 0)
     {
+        // backward
         while(curangle > totalangle)
         {
             curangle -= rotspeed;
-            LegoMotorPIDControl(&LegoMotor,MOTOR_L, curangle*2, KP, KD, KI, IMAX);
+            LegoMotorPIDControl(&LegoMotor,MOTOR_L, curangle*2, KP, KD, KI, IMAX);  // *2 because PID controller works with half degrees
             TimeStep(0);
         }
     }
 }
+
 
 /**
  * \brief Rotate robot around center of wheelbase over specified angle, at specified speed. Returns after drive is complete.
@@ -192,10 +233,18 @@ void DriveRotateLWheel(float Angle,float Speed)
 */
 void DriveRotateCenter(float Angle,float Speed)
 {
+    // Delay of 50ms to stabilize sensors and motors
+    _delay_ms(50);
+
+    // Safety mechanism: speed limited to maximum 100 mm/s.
+    if(Speed > 100)
+    {
+        Speed = 100;
+    }
+
     float rotspeed = (fabs(Speed)/100)/MMPD;    // Speed /s --> /10ms is dividing by 100  == [degrees / 10 ms]
     float totalangle = Angle*MMRD/MMPD;         // total turning distance for wheel
     float curangle = 0;
-    TimeStepInit(10000);
 
     // enable R and L motor
     LegoMotorSetup(&LegoMotor,MOTOR_L,1,1);
@@ -205,6 +254,9 @@ void DriveRotateCenter(float Angle,float Speed)
     LegoMotorSetPos(&LegoMotor, MOTOR_L, 0);
     LegoMotorSetPos(&LegoMotor, MOTOR_R, 0);
 
+    // Setup timestep module with time step of 10ms
+    TimeStepInit(10000);
+
     if(totalangle > 0)
     {
         while(curangle < totalangle)
@@ -228,14 +280,24 @@ void DriveRotateCenter(float Angle,float Speed)
 }
 
 
+/**
+ * \brief Get 300 sensor samples and calculate the average for each sensor as calibration.
+ * \return The average difference between the 2 sensors
+*/
+
 int calibrate()
 {
-    uint16 iL = 0;
-    uint16 iR = 0;
+    // Delay of 50ms to stabilize after sensor setup in Init function
+    _delay_ms(50);
+
+    uint16 iL = 0;      // variable to get left sensor intensity
+    uint16 iR = 0;      // variable to get right sensor intensity
     int arr[300];
     int iLarr[300];
     int iRarr[300];
     int i;
+
+    // Get 300 intensities
     for(i = 0; i < 300; i++)
     {
         LegoSensorGetLSensorData(&LegoSensor, SENSOR_L, &iL);
@@ -265,25 +327,26 @@ int calibrate()
  * \param Distance :Distance in mm
  * \param Speed :Speed in mm/s
 */
+
 void DriveLineFollowDistance(int Distance, float Speed)
 {
+    // Delay of 50ms to stabilize sensors and motors
+    _delay_ms(50);
+
+    // Safety mechanism: speed limited to maximum 100 mm/s.
+    if(Speed > 100)
+    {
+        Speed = 100;
+    }
+
     // init motors
     // put in PID mode
     LegoMotorSetup(&LegoMotor,MOTOR_R,1,1);
     LegoMotorSetup(&LegoMotor,MOTOR_L,1,1);
 
-    // reset pos
+    // reset angular motor position
     LegoMotorSetPos(&LegoMotor, MOTOR_R, 0);
     LegoMotorSetPos(&LegoMotor, MOTOR_L, 0);
-
-    TimeStepInit(10000);
-
-    // Setup reflection sensors
-    LegoSensorInit(&LegoSensor);
-    LegoSensorSetup(&LegoSensor, SENSOR_R, CFG_LSENSOR);
-    LegoSensorSetup(&LegoSensor, SENSOR_L, CFG_LSENSOR);
-    LegoSensorSetupLSensor(&LegoSensor, SENSOR_R, 1);
-    LegoSensorSetupLSensor(&LegoSensor, SENSOR_L, 1);
 
     // variables
     int totaldist = 0;
@@ -299,6 +362,9 @@ void DriveLineFollowDistance(int Distance, float Speed)
     float nextL = 0;
     float nextR = 0;
     float rotSpeed = Speed/100/MMPD;
+
+    // Setup timestep module with time step of 10ms
+    TimeStepInit(10000);
 
     // while distance, nu negeren
     while(totaldist < Distance)
@@ -322,6 +388,7 @@ void DriveLineFollowDistance(int Distance, float Speed)
             speedR = Speed;
         }
 
+        // Check if increase angle is above/under max/min
         incL = speedL/100/MMPD;
         if(incL < 0)
         {
@@ -332,6 +399,7 @@ void DriveLineFollowDistance(int Distance, float Speed)
             incL = rotSpeed;
         }
 
+        // Check if increase angle is above/under max/min
         incR = speedR/100/MMPD;
         if(incR < 0)
         {
@@ -353,15 +421,23 @@ void DriveLineFollowDistance(int Distance, float Speed)
     }
 }
 
+
 /**
  * \brief Follow line until end of line segment
  * \param Speed :Speed in mm/s
 */
+
 void DriveLineFollow(float Speed)
 {
-    int whiteCounter = 0;
-    //sleep(1);
-    // init motors
+    // Delay of 50ms to stabilize sensors and motors
+    _delay_ms(50);
+
+    // Safety mechanism: speed limited to maximum 100 mm/s.
+    if(Speed > 100)
+    {
+        Speed = 100;
+    }
+
     // put in PID mode
     LegoMotorSetup(&LegoMotor,MOTOR_R,1,1);
     LegoMotorSetup(&LegoMotor,MOTOR_L,1,1);
@@ -369,15 +445,6 @@ void DriveLineFollow(float Speed)
     // reset pos
     LegoMotorSetPos(&LegoMotor, MOTOR_R, 0);
     LegoMotorSetPos(&LegoMotor, MOTOR_L, 0);
-
-    TimeStepInit(10000);
-
-    // Setup reflection sensors
-    LegoSensorInit(&LegoSensor);
-    LegoSensorSetup(&LegoSensor, SENSOR_R, CFG_LSENSOR);
-    LegoSensorSetup(&LegoSensor, SENSOR_L, CFG_LSENSOR);
-    LegoSensorSetupLSensor(&LegoSensor, SENSOR_R, 1);
-    LegoSensorSetupLSensor(&LegoSensor, SENSOR_L, 1);
 
     // variables
     uint16 iL = 0;
@@ -393,6 +460,9 @@ void DriveLineFollow(float Speed)
     float nextR = 0;
     float rotSpeed = Speed/100/MMPD;
     int stop = 0;
+
+    // Setup timestep module with time step of 10ms
+    TimeStepInit(10000);
 
     // while distance, nu negeren
     while(stop == 0)
@@ -416,6 +486,7 @@ void DriveLineFollow(float Speed)
             speedR = Speed;
         }
 
+        // Check if increase angle is above/under max/min
         incL = speedL/100/MMPD;
         if(incL < 0)
         {
@@ -426,6 +497,7 @@ void DriveLineFollow(float Speed)
             incL = rotSpeed;
         }
 
+        // Check if increase angle is above/under max/min
         incR = speedR/100/MMPD;
         if(incR < 0)
         {
@@ -446,19 +518,7 @@ void DriveLineFollow(float Speed)
         // 8% daling in intensiteit om wit te detecteren
         if((iL < (iLcal*0.92)) && (iR < (iRcal*0.92)))
         {
-            whiteCounter++;
-
-            if(whiteCounter > 1)
-            {
-                stop = 1;
-            }
-            printf("STOP iL: %d iLcal: %d iLcal 8: %f iR: %d iRcal: %f\n", iL, iLcal, iLcal*0.92, iR, iR*0.92);
-        }
-        else
-        {
-           whiteCounter = 0;
-           // printf("CONTINUE\n");
-           // printf("iL: %d iR: %d\n", iL, iR);
+            stop = 1;
         }
     }
 }
