@@ -7,9 +7,6 @@ int Travel(NodeStruct* Map, int MapSize, int Start, int Finish, float Speed)
 
     do
     {
-printf("POSITION: %d\n", previousPoint);
-printf("NEXT: %d\n", Map[previousPoint].Next);
-printf("DIRECTION: %d\n", Map[previousPoint].NextRelDir);
         switch(Map[previousPoint].NextRelDir)
         {
             case 1:
