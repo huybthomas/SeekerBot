@@ -2,7 +2,7 @@
 
 The SeekerBot is an embedded robot project of two collage students. The robot is designed and build by
 Professor Paillet Eric of the University of Antwerp. The SeekerBot is equiped with Lego Mindstorm
-actuators and sensores. These are connected with custom PCBs to a Raspberri Pi for processing.
+actuators and sensors. These are connected with custom PCBs to a Raspberri Pi for processing.
 
 The SeekerBot will start on a random endpoint on the map. It will search for the package with the
 wanted name indicated by the QR-codes attached to the packages. When the package is found, the location
